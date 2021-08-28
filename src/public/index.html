@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Together</title>
+</head>
+
+<body>
+    <div id="player"></div>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script>
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '360',
+                width: '640',
+                videoId: '-tKVN2mAKRI',
+                events: {
+                    'onStateChange': onPlayerStateChange,
+                },
+            });
+        }
+
+        var socket = io();
+        socket.on('message', function (message) {
+            console.log('message:', message);
+        });
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                socket.send('play');
+            } else if (event.data == YT.PlayerState.PAUSED) {
+                socket.send('pause');
+            } else if (event.data == YT.PlayerState.ENDED) {
+                socket.send('ended');
+            }
+        }
+    </script>
+</body>
+
+</html>
