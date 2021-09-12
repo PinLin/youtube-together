@@ -5,13 +5,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Together</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+        integrity="sha384-B0vP5xmATw1+K9KRQjQERJvTumQW0nPEzvF6L/Z6nronJ3oUOFUFpCjEUQouq2+l" crossorigin="anonymous">
+    <style>
+        hr {
+            margin: 30px auto;
+        }
+
+        #content header {
+            padding-top: 2%;
+        }
+
+        #player {
+            margin-bottom: 2vmin;
+        }
+    </style>
+    <script src="https://cdn.socket.io/4.1.2/socket.io.min.js"
+        integrity="sha384-toS6mmwu70G0fw54EGlWWeA4z3dyJ+dlXBtSURSKN4vyRFOcxd3Bzjj/AoOwY+Rg"
+        crossorigin="anonymous"></script>
 </head>
 
 <body>
-    <div id="player"></div>
+    <div id="content" class="container-md">
+        <header>
+            <p class="display-3 text-center text-secondary">YouTube Together</p>
+            <p class="text-center text-secondary">Play YouTube videos with friends synchronously.</p>
+        </header>
 
+        <hr>
+
+        <div class="row">
+            <div id="player" class="col-lg-6 col-12"></div>
+            <div class="col-lg-6 col-12">
+                <div id="inviteLinkGroup" class="form-group" hidden>
+                    <label class="text-secondary">Invite Link</label>
+                    <div class="input-group">
+                        <input type="url" readonly id="inviteLink" class="form-control-plaintext text-primary" value="">
+                        <button id="copyInviteLinkButton" class="btn btn-sm btn-secondary" disabled
+                            data-clipboard-target="#inviteLink">Copy</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="text-secondary">Play List</label>
+                    <div id="playList" class="list-group" style="max-height: 330px; overflow: scroll;">
+                        <li class="list-group-item list-group-item-action list-group-item-secondary">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </li>
+                        <li class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </li>
+                    </div>
+                </div>
+
+                <div id="newMediaGroup" class="input-group" hidden>
+                    <input type="url" class="form-control" id="newMediaUrl" placeholder="Media URL">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <footer>
+            <p class="text-center text-dark">(ˊ・ω・ˋ)(ˊ・ω・ˋ)(ˊ・ω・ˋ)</p>
+        </footer>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.8/dist/clipboard.min.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script>
+        new ClipboardJS('.btn');
+
         var player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
@@ -24,9 +139,21 @@
             });
         }
 
+        var following;
+        if (location.search.match('follow=[A-z0-9-]+')) {
+            following = location.search.match('follow=[A-z0-9-]+')[0].split('=')[1];
+        } else {
+            $('#playList').css('max-height', '190px');
+            $('#inviteLinkGroup').removeAttr('hidden');
+            $('#newMediaGroup').removeAttr('hidden');
+            $('.delete-media-buttons').removeAttr('hidden');
+        }
+
         var socket = io();
-        socket.on('message', function (message) {
-            console.log('message:', message);
+
+        socket.on('connect', function () {
+            $('#inviteLink').val(location.origin + '?follow=' + socket.id);
+            $('#copyInviteLinkButton').removeAttr('disabled');
         });
 
         function onPlayerStateChange(event) {
