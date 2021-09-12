@@ -132,13 +132,15 @@
         $('#addNewMedia').click(function () {
             var url = $('#newMediaUrl').val();
             if (url.match('youtube.com/watch\\?v=[A-z0-9-]+')) {
-                playList.push('https://youtu.be/' + url.split('watch?v=')[1]);
+                playList[0] = 'https://youtu.be/' + url.split('watch?v=')[1];
             }
             if (url.match('youtu.be/[A-z0-9-]+')) {
-                playList.push('https://youtu.be/' + url.split('youtu.be/')[1]);
+                playList[0] = 'https://youtu.be/' + url.split('youtu.be/')[1];
             }
             $('#newMediaUrl').val('');
             refreshPlayList();
+
+            player.loadVideoById(playList[0].split('youtu.be/')[1]);
         });
 
         var socket = io();
