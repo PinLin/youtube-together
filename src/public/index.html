@@ -134,7 +134,7 @@
                 width: '640',
                 videoId: '-tKVN2mAKRI',
                 events: {
-                    'onStateChange': onPlayerStateChange,
+                    'onReady': onPlayerReady,
                 },
             });
         }
@@ -156,13 +156,61 @@
             $('#copyInviteLinkButton').removeAttr('disabled');
         });
 
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING) {
-                socket.send('play');
-            } else if (event.data == YT.PlayerState.PAUSED) {
-                socket.send('pause');
-            } else if (event.data == YT.PlayerState.ENDED) {
-                socket.send('ended');
+
+        function onPlayerReady(event) {
+            if (following) {
+                var toloranceLevel = 0;
+                
+                function sync() {
+                    var startTime = Date.now();
+                    socket.emit('sync', following, function (room) {
+                        if (player.getVideoData().video_id != room.media) {
+                            player.loadVideoById(room.media);
+                        }
+                        if (player.getPlaybackRate() != room.speed) {
+                            player.setPlaybackRate(room.speed);
+                        }
+
+                        if (room.state == YT.PlayerState.PLAYING) {
+                            var offset = (Date.now() - startTime) / 2000;
+                            var timeDelta = player.getCurrentTime() - (room.progress + offset);
+                            if (Math.abs(timeDelta) > 0.05 * (toloranceLevel + 1)) {
+                                toloranceLevel = 0;
+                                player.seekTo(room.progress + offset + 0.18);   // 0.18 is a hardcoded offset
+                                console.log('seek!');
+                            } else {
+                                toloranceLevel++;
+                                if (toloranceLevel > 19) {
+                                    toloranceLevel = 19;
+                                }
+                            }
+                        }
+                        if (player.getPlayerState() != room.state) {
+                            if (room.state == YT.PlayerState.PLAYING) {
+                                player.playVideo();
+                            }
+                            if (room.state == YT.PlayerState.PAUSED) {
+                                player.pauseVideo();
+                            }
+                        }
+                        console.log('progress:', room.progress, 'offset:', offset, 'timeDelta:', timeDelta);
+
+                        setTimeout(function () { sync(); }, 1000);
+                    });
+                }
+                sync();
+            } else {
+                socket.emit('host');
+
+                socket.on('update', function (callback) {
+                    const room = {
+                        media: player.getVideoData().video_id,
+                        state: player.getPlayerState(),
+                        speed: player.getPlaybackRate(),
+                        progress: player.getCurrentTime(),
+                    };
+                    callback(room);
+                });
             }
         }
     </script>
