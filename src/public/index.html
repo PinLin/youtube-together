@@ -49,49 +49,9 @@
                 <div class="form-group">
                     <label class="text-secondary">Play List</label>
                     <div id="playList" class="list-group" style="max-height: 330px; overflow: scroll;">
-                        <li class="list-group-item list-group-item-action list-group-item-secondary">
+                        <li class="list-group-item list-group-item-action play-list-item" hidden>
                             <div class="d-flex justify-content-between">
-                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
-                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </li>
-                        <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
-                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </li>
-                        <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
-                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </li>
-                        <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
-                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </li>
-                        <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
-                                <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                        </li>
-                        <li class="list-group-item list-group-item-action">
-                            <div class="d-flex justify-content-between">
-                                <span class="text-dark">https://www.youtube.com/watch?v=-tKVN2mAKRI</span>
+                                <span class="text-dark">Media URL</span>
                                 <button type="button" class="close delete-media-buttons" hidden aria-label="Close">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
@@ -103,7 +63,7 @@
                 <div id="newMediaGroup" class="input-group" hidden>
                     <input type="url" class="form-control" id="newMediaUrl" placeholder="Media URL">
                     <div class="input-group-append">
-                        <button class="btn btn-secondary">Add</button>
+                        <button class="btn btn-secondary" id="addNewMedia">Add</button>
                     </div>
                 </div>
             </div>
@@ -149,6 +109,38 @@
             $('.delete-media-buttons').removeAttr('hidden');
         }
 
+        var playList = [
+            'https://youtu.be/-tKVN2mAKRI',
+        ];
+        var playListSelectedIndex = 0;
+
+        var _samplePlayListItem = $('.play-list-item').clone();
+        function refreshPlayList() {
+            $('#playList').empty();
+            for (var i = 0; i < playList.length; i++) {
+                var item = _samplePlayListItem.clone();
+                if (i === playListSelectedIndex) {
+                    item.addClass('list-group-item-secondary');
+                }
+                item.children('div').children('span').text(playList[i]);
+                item.removeAttr('hidden');
+                $('#playList').append(item);
+            }
+        }
+        refreshPlayList();
+
+        $('#addNewMedia').click(function () {
+            var url = $('#newMediaUrl').val();
+            if (url.match('youtube.com/watch\\?v=[A-z0-9-]+')) {
+                playList.push('https://youtu.be/' + url.split('watch?v=')[1]);
+            }
+            if (url.match('youtu.be/[A-z0-9-]+')) {
+                playList.push('https://youtu.be/' + url.split('youtu.be/')[1]);
+            }
+            $('#newMediaUrl').val('');
+            refreshPlayList();
+        });
+
         var socket = io();
 
         socket.on('connect', function () {
@@ -160,7 +152,7 @@
         function onPlayerReady(event) {
             if (following) {
                 var toloranceLevel = 0;
-                
+
                 function sync() {
                     var startTime = Date.now();
                     socket.emit('sync', following, function (room) {
